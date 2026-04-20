@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgentFlow — შექმენი AI აგენტები და ვებსაიტები</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    * { font-family: 'Inter', system-ui, sans-serif; box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      color: #fff;
+    }
+
+    /* ── Nav ─────────────────────────────────────────────────────────── */
+    nav.scrolled {
+      background: rgba(0,0,0,0.9) !important;
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    /* ── Scroll-driven video hero ────────────────────────────────────── */
+    #video-wrapper {
+      position: relative;
+      height: 100vh;
+    }
+
+    #video-sticky-container {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    #hero-video {
+      width: 68%;
+      height: 68%;
+      object-fit: contain;
+      margin: auto;
+      display: block;
+      position: absolute;
+      top: 64%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      will-change: transform;
+      image-rendering: auto;
+    }
+
+    #hero-text-col {
+      pointer-events: auto;
+    }
+
+    /* Dark overlay so text is readable over the video */
+    #hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.55) 0%,
+        rgba(0,0,0,0.15) 45%,
+        rgba(0,0,0,0.55) 100%
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Text overlaid on top of the video */
+    #hero-text-col {
+      position: absolute;
+      top: 6%;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      text-align: center;
+      width: 100%;
+      max-width: 720px;
+      padding: 0 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      pointer-events: auto;
+    }
+
+    .hero-tagline {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(168,85,247,0.9);
+      margin: 0 0 18px;
+    }
+
+    .hero-subtitle {
+      font-size: 15px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.5);
+      max-width: 480px;
+      margin: 12px 0 28px;
+    }
+
+    .hero-buttons {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 36px;
+    }
+
+    .hero-stats {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+
+    .hero-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .hero-stat-value {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #fff;
+    }
+
+    .hero-stat-label {
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.04em;
+    }
+
+    .hero-stat-divider {
+      width: 1px;
+      height: 32px;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .hero-eyebrow {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 16px;
+    }
+
+    .hero-title {
+      font-size: clamp(48px, 7vw, 110px);
+      font-weight: 900;
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+      color: #fff;
+      margin: 0 0 20px;
+    }
+
+    .hero-desc {
+      font-size: 16px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.6);
+      max-width: 520px;
+      margin: 0 0 32px;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      color: #000;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      padding: 14px 30px;
+      border-radius: 4px;
+      text-decoration: none;
+      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn-primary:hover {
+      background: #e8e8e8;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(255,255,255,0.15);
+    }
+
+    /* ── Scroll fade-in ───────────────────────────────────────────────── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .delay-1 { transition-delay: 0ms; }
+    .delay-2 { transition-delay: 130ms; }
+    .delay-3 { transition-delay: 260ms; }
+
+    /* ── Gradient animated text ───────────────────────────────────────── */
+    .gradient-text {
+      background: linear-gradient(135deg, #fff 0%, #a5b4fc 40%, #c084fc 70%, #fff 100%);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradient-shift 6s ease infinite;
+    }
+    @keyframes gradient-shift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* ── Feature cards ────────────────────────────────────────────────── */
+    .feature-card {
+      background: #080808;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 36px;
+      transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .feature-card:hover {
+      border-color: rgba(99,102,241,0.35);
+      transform: translateY(-4px);
+      box-shadow: 0 0 40px rgba(99,102,241,0.08);
+    }
+
+    /* ── Buttons ─────────────────────────────────────────────────────── */
+    .btn-glow {
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      color: #fff;
+      font-weight: 600;
+      font-size: 15px;
+      padding: 16px 36px;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-block;
+      transition: box-shadow 0.3s ease, transform 0.2s ease;
+    }
+    .btn-glow:hover {
+      box-shadow: 0 0 40px rgba(99,102,241,0.45);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.7);
+      font-weight: 500;
+      font-size: 15px;
+      padding: 16px 36px;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-block;
+      transition: border-color 0.3s ease, color 0.3s ease, background 0.3s ease;
+    }
+    .btn-ghost:hover {
+      border-color: rgba(99,102,241,0.5);
+      color: #fff;
+      background: rgba(99,102,241,0.07);
+    }
+
+    /* ── Noise overlay ────────────────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.02;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+      z-index: 9999;
+    }
+
+    /* ── Scroll bounce indicator ─────────────────────────────────────── */
+    @keyframes bounce-down {
+      0%, 100% { transform: translateY(0); opacity: 0.4; }
+      50%       { transform: translateY(7px); opacity: 0.9; }
+    }
+    .bounce-down { animation: bounce-down 2s ease-in-out infinite; }
+
+    /* ── Logo inline style ───────────────────────────────────────────── */
+    .logo-flow {
+      font-style: italic;
+      background: linear-gradient(135deg, #a855f7, #7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      padding-right: 0.08em;
+    }
+
+    /* ── Sections ─────────────────────────────────────────────────────── */
+    .section-eyebrow {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(99,102,241,0.9);
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+<style>
+  html, body { overflow: unset !important; }
+</style>
+
+  <!-- ── NAV ─────────────────────────────────────────────────────────────── -->
+  <nav id="nav" class="fixed top-0 left-0 right-0 z-50 transition-all duration-400" style="background:transparent;">
+    <div style="max-width:1400px;margin:0 auto;padding:20px 48px;display:flex;align-items:center;justify-content:space-between;">
+      <!-- Logo -->
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:28px;height:28px;background:linear-gradient(135deg,#6366f1,#a855f7);border-radius:6px;display:flex;align-items:center;justify-content:center;">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1.5 6.5h10M6.5 1.5l5 5-5 5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <span style="font-weight:700;font-size:15px;letter-spacing:-0.02em;">Agent<span class="logo-flow">Flow</span></span>
+      </div>
+
+      <!-- Center nav links -->
+      <div style="display:flex;align-items:center;gap:40px;" class="hidden md:flex">
+        <a href="#features"     style="font-size:14px;color:rgba(255,255,255,0.5);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">აგენტები</a>
+        <a href="#how-it-works" style="font-size:14px;color:rgba(255,255,255,0.5);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">ტექნოლოგია</a>
+        <a href="#contact"      style="font-size:14px;color:rgba(255,255,255,0.5);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">ფასები</a>
+      </div>
+
+      <!-- CTA -->
+      <a href="#booking" style="font-size:13px;font-weight:600;color:#fff;background:linear-gradient(135deg,#6366f1,#a855f7);padding:10px 22px;border-radius:6px;text-decoration:none;letter-spacing:0.01em;transition:box-shadow 0.2s,transform 0.2s;" onmouseover="this.style.boxShadow='0 0 24px rgba(99,102,241,0.5)';this.style.transform='translateY(-1px)'" onmouseout="this.style.boxShadow='none';this.style.transform='none'">
+        დემოს დაჯავშნა
+      </a>
+    </div>
+  </nav>
+
+  <!-- ── SCROLL-DRIVEN VIDEO HERO ───────────────────────────────────────── -->
+  <div id="video-wrapper">
+    <div id="video-sticky-container">
+
+      <!-- Video fills the full viewport, no controls, no autoplay -->
+      <video id="hero-video" src="dc53e34b754bf0b0b781ebaad54ded58_1_1776496291_9089.mp4" muted playsinline preload="auto"></video>
+
+      <!-- Gradient overlay for text readability -->
+      <div id="hero-overlay"></div>
+
+
+      <!-- Hero content above the laptop -->
+      <div id="hero-text-col">
+
+        <!-- Tagline -->
+        <p class="hero-tagline">AI ავტომატიზაცია შენი ბიზნესისთვის</p>
+
+        <!-- Logo -->
+        <div style="line-height:1;user-select:none;margin-bottom:16px;">
+          <span style="font-size:clamp(44px,6.5vw,88px);font-weight:800;letter-spacing:-0.03em;color:#ffffff;">Agent</span><span style="font-size:clamp(44px,6.5vw,88px);font-weight:800;letter-spacing:-0.03em;font-style:italic;background:linear-gradient(135deg,#a855f7,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;padding-right:0.12em;">Flow</span>
+        </div>
+
+        <!-- Subtitle -->
+        <p class="hero-subtitle">შექმენი ჭკვიანი AI აგენტები და ვებსაიტები — ყოველგვარი კოდის გარეშე. შენი ბიზნესი მუშაობს 24/7, ავტომატურად.</p>
+
+        <!-- CTA Buttons -->
+        <div class="hero-buttons">
+          <a href="#booking" class="btn-primary" style="background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;border-radius:8px;font-size:14px;font-weight:700;padding:14px 28px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:box-shadow 0.2s,transform 0.2s;" onmouseover="this.style.boxShadow='0 0 32px rgba(168,85,247,0.5)';this.style.transform='translateY(-1px)'" onmouseout="this.style.boxShadow='none';this.style.transform='none'">
+            დემოს დაჯავშნა
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a href="#how-it-works" style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);padding:13px 28px;border-radius:8px;text-decoration:none;transition:border-color 0.2s,color 0.2s;" onmouseover="this.style.borderColor='rgba(168,85,247,0.5)';this.style.color='#fff'" onmouseout="this.style.borderColor='rgba(255,255,255,0.15)';this.style.color='rgba(255,255,255,0.7)'">
+            როგორ მუშაობს
+          </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="hero-stat-value">24/7</span>
+            <span class="hero-stat-label">უწყვეტი მუშაობა</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">80%</span>
+            <span class="hero-stat-label">ნაკლები სამუშაო</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">3×</span>
+            <span class="hero-stat-label">უფრო სწრაფი</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">2 წთ</span>
+            <span class="hero-stat-label">დაყენების დრო</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+  <!-- /SCROLL-DRIVEN VIDEO HERO -->
+
+  <!-- ── FEATURES ────────────────────────────────────────────────────────── -->
+  <section id="features" style="padding:120px 48px;background:#000;position:relative;z-index:20;">
+    <div style="max-width:1200px;margin:0 auto;">
+
+      <div style="margin-bottom:64px;" class="fade-up">
+        <p class="section-eyebrow">სერვისები</p>
+        <h2 style="font-size:clamp(32px,4vw,52px);font-weight:800;letter-spacing:-0.03em;line-height:1.1;margin:0 0 16px;">
+          ავტომატიზაცია, რომელიც<br/>ყიდის შენ მაგივრად
+        </h2>
+        <p style="font-size:16px;color:rgba(255,255,255,0.4);max-width:520px;line-height:1.7;margin:0;">
+          Agent<span class="logo-flow">Flow</span> ქმნის სოციალური ქსელების AI ჩატბოტებს და პროფესიონალურ ვებსაიტებს თქვენი ბიზნესის 24/7 ზრდისთვის.
+        </p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;">
+
+        <div class="feature-card fade-up delay-1">
+          <div style="width:44px;height:44px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:24px;">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 4a2 2 0 012-2h10a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V4z" stroke="#6366f1" stroke-width="1.4"/><path d="M6 8h8M6 12h5" stroke="#6366f1" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </div>
+          <h3 style="font-size:18px;font-weight:700;margin:0 0 10px;">AI ჩატბოტები სოც. ქსელებისთვის</h3>
+          <p style="font-size:14px;color:rgba(255,255,255,0.4);line-height:1.7;margin:0 0 20px;">
+            ავტომატური პასუხები და გაყიდვები ნებისმიერ სოციალურ ქსელში. აქტიურია 24/7-ზე, ადამიანური რესურსის გარეშე.
+          </p>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span style="padding:4px 10px;background:rgba(255,255,255,0.04);border-radius:4px;font-size:11px;color:rgba(255,255,255,0.4);">24/7 აქტიური</span>
+            <span style="padding:4px 10px;background:rgba(255,255,255,0.04);border-radius:4px;font-size:11px;color:rgba(255,255,255,0.4);">ავტო-გაყიდვები</span>
+          </div>
+        </div>
+
+        <div class="feature-card fade-up delay-2">
+          <div style="width:44px;height:44px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:24px;">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="16" height="16" rx="3" stroke="#a855f7" stroke-width="1.4"/><path d="M5 7h10M5 10.5h6M5 14h8" stroke="#a855f7" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </div>
+          <h3 style="font-size:18px;font-weight:700;margin:0 0 10px;">პროფესიონალური ვებსაიტები</h3>
+          <p style="font-size:14px;color:rgba(255,255,255,0.4);line-height:1.7;margin:0 0 20px;">
+            თანამედროვე, სწრაფი და კონვერსიაზე ორიენტირებული საიტები. სრული ადაპტაცია ყველა მოწყობილობისთვის.
+          </p>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span style="padding:4px 10px;background:rgba(255,255,255,0.04);border-radius:4px;font-size:11px;color:rgba(255,255,255,0.4);">მობილურზე ადაპტირებული</span>
+            <span style="padding:4px 10px;background:rgba(255,255,255,0.04);border-radius:4px;font-size:11px;color:rgba(255,255,255,0.4);">კონვერსიაზე ორიენტირებული</span>
+          </div>
+        </div>
+
+        <div class="feature-card fade-up delay-3">
+          <div style="width:44px;height:44px;background:rgba(236,72,153,0.1);border:1px solid rgba(236,72,153,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:24px;">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3" stroke="#ec4899" stroke-width="1.4"/><path d="M10 3v1.5M10 15.5V17M3 10h1.5M15.5 10H17M5.05 5.05l1.06 1.06M13.89 13.89l1.06 1.06M5.05 14.95l1.06-1.06M13.89 6.11l1.06-1.06" stroke="#ec4899" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </div>
+          <h3 style="font-size:18px;font-weight:700;margin:0 0 10px;">ავტონომიური სისტემები</h3>
+          <p style="font-size:14px;color:rgba(255,255,255,0.4);line-height:1.7;margin:0 0 20px;">
+            რთული ბიზნეს პროცესების ავტომატიზაცია. დაზოგეთ დრო და ფოკუსირდით მხოლოდ სტრატეგიულ ზრდაზე.
+          </p>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span style="padding:4px 10px;background:rgba(255,255,255,0.04);border-radius:4px;font-size:11px;color:rgba(255,255,255,0.4);">პროცესების ავტომატიზაცია</span>
+            <span style="padding:4px 10px;background:rgba(255,255,255,0.04);border-radius:4px;font-size:11px;color:rgba(255,255,255,0.4);">სტრატეგიული ზრდა</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── HOW IT WORKS ─────────────────────────────────────────────────────── -->
+  <section id="how-it-works" style="padding:120px 48px;background:#050505;position:relative;z-index:20;">
+    <div style="max-width:1000px;margin:0 auto;">
+
+      <div style="margin-bottom:64px;" class="fade-up">
+        <p class="section-eyebrow">მარტივი პროცესი</p>
+        <h2 style="font-size:clamp(32px,4vw,52px);font-weight:800;letter-spacing:-0.03em;line-height:1.1;margin:0 0 16px;">
+          სამი ნაბიჯი.<br/>სულ ეს.
+        </h2>
+        <p style="font-size:16px;color:rgba(255,255,255,0.4);max-width:420px;line-height:1.7;margin:0;">
+          საინჟინრო გუნდი არ არის საჭირო. შექმნილია დამფუძნებლებისა და სწრაფი გუნდებისთვის.
+        </p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:48px;position:relative;">
+
+        <div class="fade-up delay-1">
+          <div style="width:52px;height:52px;background:linear-gradient(135deg,#6366f1,#4f46e5);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;margin-bottom:24px;">1</div>
+          <h3 style="font-size:18px;font-weight:700;margin:0 0 10px;">აღწერეთ თქვენი აგენტი</h3>
+          <p style="font-size:14px;color:rgba(255,255,255,0.4);line-height:1.7;margin:0;">უთხარით Agent<span class="logo-flow">Flow</span>-ს რა გინდათ მარტივი სიტყვებით. ტექნიკური ჟარგონი არ არის — მხოლოდ თქვენი მიზანი.</p>
+        </div>
+
+        <div class="fade-up delay-2">
+          <div style="width:52px;height:52px;background:linear-gradient(135deg,#a855f7,#7c3aed);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;margin-bottom:24px;">2</div>
+          <h3 style="font-size:18px;font-weight:700;margin:0 0 10px;">კონფიგურაცია და მორგება</h3>
+          <p style="font-size:14px;color:rgba(255,255,255,0.4);line-height:1.7;margin:0;">დაუკავშირეთ მონაცემები, დააყენეთ ბრენდი, მოარგეთ ქცევა — ყველაფერი სუფთა ვიზუალური დაფიდან.</p>
+        </div>
+
+        <div class="fade-up delay-3">
+          <div style="width:52px;height:52px;background:linear-gradient(135deg,#ec4899,#a855f7);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;margin-bottom:24px;">3</div>
+          <h3 style="font-size:18px;font-weight:700;margin:0 0 10px;">განათავსეთ და დააკვირდით</h3>
+          <p style="font-size:14px;color:rgba(255,255,255,0.4);line-height:1.7;margin:0;">ერთი კლიკი გასაშვებად. თქვენი აგენტი მყისიერად იწყებს მუშაობას — მონიტორინგდება და მუდმივად უმჯობესდება.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STATS ────────────────────────────────────────────────────────────── -->
+  <section style="padding:80px 48px;border-top:1px solid rgba(255,255,255,0.04);border-bottom:1px solid rgba(255,255,255,0.04);background:#000;position:relative;z-index:20;">
+    <div style="max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:48px;text-align:center;">
+      <div class="fade-up delay-1">
+        <div style="font-size:44px;font-weight:900;letter-spacing:-0.04em;background:linear-gradient(135deg,#fff,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;">10×</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.35);letter-spacing:0.04em;">დაქირავებაზე სწრაფი</div>
+      </div>
+      <div class="fade-up delay-2">
+        <div style="font-size:44px;font-weight:900;letter-spacing:-0.04em;background:linear-gradient(135deg,#fff,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;">2 წთ</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.35);letter-spacing:0.04em;">საშუალო დაყენების დრო</div>
+      </div>
+      <div class="fade-up delay-3">
+        <div style="font-size:44px;font-weight:900;letter-spacing:-0.04em;background:linear-gradient(135deg,#fff,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;">99.9%</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.35);letter-spacing:0.04em;">მუშაობის SLA</div>
+      </div>
+      <div class="fade-up delay-3" style="transition-delay:390ms;">
+        <div style="font-size:44px;font-weight:900;letter-spacing:-0.04em;background:linear-gradient(135deg,#fff,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;">0</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.35);letter-spacing:0.04em;">კოდის სტრიქონი საჭირო</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── BOOKING ───────────────────────────────────────────────────────────── -->
+  <section id="booking" style="padding:100px 48px 80px;background:#000;position:relative;z-index:20;">
+    <!-- Glow -->
+    <div style="position:absolute;width:700px;height:400px;background:radial-gradient(ellipse,rgba(168,85,247,0.08) 0%,transparent 70%);top:0;left:50%;transform:translateX(-50%);pointer-events:none;"></div>
+
+    <div style="max-width:900px;margin:0 auto;position:relative;z-index:1;">
+
+      <div style="text-align:center;margin-bottom:56px;" class="fade-up">
+        <p class="section-eyebrow">შეხვედრის დაჯავშნა</p>
+        <h2 style="font-size:clamp(32px,4.5vw,60px);font-weight:900;letter-spacing:-0.04em;line-height:1.05;margin:0 0 16px;">
+          დემოს <span style="background:linear-gradient(135deg,#a855f7,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">დაჯავშნა</span>
+        </h2>
+        <p style="font-size:16px;color:rgba(255,255,255,0.4);max-width:460px;margin:0 auto;line-height:1.7;">
+          აირჩიე შენთვის მოსახერხებელი დრო — 20 წუთი, ვალდებულების გარეშე.
+        </p>
+      </div>
+
+      <!-- Calendly inline widget -->
+      <div class="fade-up" style="border-radius:16px;overflow:hidden;border:1px solid rgba(168,85,247,0.15);box-shadow:0 0 60px rgba(168,85,247,0.06);">
+        <div class="calendly-inline-widget"
+          data-url="https://calendly.com/datodarjania8?background_color=000000&text_color=ffffff&primary_color=a855f7"
+          style="min-width:320px;height:680px;">
+        </div>
+      </div>
+
+    </div>
+  </section>
+  <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
+
+  <!-- ── CTA BANNER ──────────────────────────────────────────────────────── -->
+  <section id="contact" style="padding:160px 48px;background:#000;position:relative;overflow:hidden;z-index:20;">
+    <!-- Glow orb -->
+    <div style="position:absolute;width:600px;height:300px;background:radial-gradient(ellipse,rgba(99,102,241,0.12) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;"></div>
+
+    <div style="max-width:700px;margin:0 auto;text-align:center;position:relative;z-index:1;" class="fade-up">
+      <p class="section-eyebrow" style="margin-bottom:20px;">დაიწყეთ დღეს</p>
+      <h2 style="font-size:clamp(36px,5vw,68px);font-weight:900;letter-spacing:-0.04em;line-height:1.05;margin:0 0 24px;">
+        მზად ხართ პირველი<br/>
+        <span style="background:linear-gradient(135deg,#6366f1,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">აგენტის შესაქმნელად?</span>
+      </h2>
+      <p style="font-size:16px;color:rgba(255,255,255,0.4);line-height:1.7;margin:0 0 44px;max-width:480px;margin-left:auto;margin-right:auto;">
+        შეუერთდით გუნდებს, რომლებიც უკვე იყენებენ Agent<span class="logo-flow">Flow</span>-ს სამუშაოს ავტომატიზაციისთვის. დაჯავშნეთ 20-წუთიანი დემო — ვალდებულება არ არის.
+      </p>
+      <a href="mailto:hello@agentflow.ai" class="btn-glow">
+        დემოს დაჯავშნა →
+      </a>
+      <p style="font-size:12px;color:rgba(255,255,255,0.2);margin-top:20px;letter-spacing:0.04em;">ჩვეულებრივ პასუხობს 1 სამუშაო დღის განმავლობაში</p>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ──────────────────────────────────────────────────────────── -->
+  <footer style="padding:32px 48px;border-top:1px solid rgba(255,255,255,0.04);background:#000;position:relative;z-index:20;">
+    <div style="max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:22px;height:22px;background:linear-gradient(135deg,#6366f1,#a855f7);border-radius:5px;display:flex;align-items:center;justify-content:center;">
+          <svg width="10" height="10" viewBox="0 0 13 13" fill="none"><path d="M1.5 6.5h10M6.5 1.5l5 5-5 5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <span style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.35);">Agent<span class="logo-flow" style="-webkit-text-fill-color:transparent;">Flow</span></span>
+      </div>
+      <p style="font-size:12px;color:rgba(255,255,255,0.18);margin:0;">© 2025 Agent<span class="logo-flow">Flow</span>. ყველა უფლება დაცულია.</p>
+      <div style="display:flex;gap:24px;">
+        <a href="#" style="font-size:12px;color:rgba(255,255,255,0.25);text-decoration:none;" onmouseover="this.style.color='rgba(255,255,255,0.6)'" onmouseout="this.style.color='rgba(255,255,255,0.25)'">კონფიდენციალობა</a>
+        <a href="#" style="font-size:12px;color:rgba(255,255,255,0.25);text-decoration:none;" onmouseover="this.style.color='rgba(255,255,255,0.6)'" onmouseout="this.style.color='rgba(255,255,255,0.25)'">პირობები</a>
+        <a href="mailto:hello@agentflow.ai" style="font-size:12px;color:rgba(255,255,255,0.25);text-decoration:none;" onmouseover="this.style.color='rgba(255,255,255,0.6)'" onmouseout="this.style.color='rgba(255,255,255,0.25)'">კონტაქტი</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const nav = document.getElementById('nav');
+    const video = document.getElementById('hero-video');
+
+    video.addEventListener('loadedmetadata', () => { video.currentTime = 0; });
+
+    let targetTime = 0;
+    let currentTime = 0;
+    let started = false;
+
+    function updateVideo() {
+      if (!video.duration) return;
+      const scrolled = window.scrollY;
+      const triggerEnd = (document.documentElement.scrollHeight - window.innerHeight) * 0.30;
+      const progress = Math.max(0, Math.min(1, scrolled / triggerEnd));
+      targetTime = progress * video.duration;
+    }
+
+    let eased = 0;
+    let lastSeekAt = 0;
+    function smoothLoop() {
+      if (!video.duration) { requestAnimationFrame(smoothLoop); return; }
+
+      eased += (targetTime - eased) * 0.12;
+
+      const diff = eased - video.currentTime;
+      const now = performance.now();
+
+      if (Math.abs(diff) < 0.04) {
+        if (!video.paused) video.pause();
+      } else if (diff > 0) {
+        video.playbackRate = Math.min(diff * 12, 16);
+        if (video.paused) video.play().catch(() => {});
+      } else {
+        if (!video.paused) video.pause();
+        if (now - lastSeekAt > 80) {
+          video.currentTime = Math.max(0, eased);
+          lastSeekAt = now;
+        }
+      }
+
+      requestAnimationFrame(smoothLoop);
+    }
+    smoothLoop();
+
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 60);
+      updateVideo();
+      revealFadeEls();
+    }, { passive: true });
+
+    function revealFadeEls() {
+      document.querySelectorAll('.fade-up:not(.visible)').forEach(el => {
+        if (el.getBoundingClientRect().top < window.innerHeight - 20) {
+          el.classList.add('visible');
+        }
+      });
+    }
+    setTimeout(revealFadeEls, 100);
+  </script>
+</body>
+</html>
