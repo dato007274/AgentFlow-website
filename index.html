@@ -355,35 +355,32 @@
       #hamburger-btn { display: flex !important; }
       #nav-inner { padding: 14px 20px !important; }
 
-      /* Hero: switch to stacked flow layout on mobile */
-      #video-wrapper { height: auto !important; }
+      /* Hero: same overlay layout as desktop, mobile-sized */
+      #video-wrapper { height: 100vh !important; }
       #video-sticky-container {
         position: relative !important;
-        height: auto !important;
-        overflow: visible !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        padding-bottom: 40px !important;
+        height: 100vh !important;
+        overflow: hidden !important;
+        display: block !important;
+        padding-bottom: 0 !important;
       }
-      #hero-overlay { display: none !important; }
-      #hero-text-col {
-        position: relative !important;
-        top: auto !important;
-        left: auto !important;
-        transform: none !important;
-        padding: 100px 20px 28px !important;
-        max-width: 100% !important;
-        width: 100% !important;
-      }
+      #hero-overlay { display: block !important; }
       #hero-video {
-        position: relative !important;
-        top: auto !important;
-        left: auto !important;
-        transform: none !important;
-        width: 100% !important;
-        height: auto !important;
+        position: absolute !important;
+        top: 64% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 96% !important;
+        height: 52% !important;
+      }
+      #hero-text-col {
+        position: absolute !important;
+        top: 3% !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        padding: 0 16px !important;
         max-width: 100% !important;
+        width: 100% !important;
       }
       .hero-tagline { font-size: 10px !important; margin-bottom: 10px !important; }
       .hero-subtitle { font-size: 13px !important; margin: 8px 0 18px !important; max-width: 100% !important; }
@@ -419,7 +416,7 @@
        RESPONSIVE — 480px (iPhone SE / small)
     ════════════════════════════════════════════════════════════════════ */
     @media (max-width: 480px) {
-      #hero-video { width: 100% !important; }
+      /* 480px inherits the 768px overlay rules above */
       #hero-text-col { top: 2% !important; }
       .hero-buttons { flex-direction: column !important; width: 100% !important; }
       .hero-buttons a { width: 100% !important; justify-content: center !important; text-align: center !important; }
