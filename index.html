@@ -367,11 +367,11 @@
       #hero-overlay { display: block !important; }
       #hero-video {
         position: absolute !important;
-        top: 64% !important;
+        top: 68% !important;
         left: 50% !important;
         transform: translate(-50%, -50%) !important;
-        width: 96% !important;
-        height: 52% !important;
+        width: 105% !important;
+        height: 60% !important;
       }
       #hero-text-col {
         position: absolute !important;
@@ -744,7 +744,8 @@
     function updateVideo() {
       if (!video.duration) return;
       const scrolled = window.scrollY;
-      const triggerEnd = (document.documentElement.scrollHeight - window.innerHeight) * 0.30;
+      const scrollFraction = isMobile ? 0.20 : 0.30;
+      const triggerEnd = (document.documentElement.scrollHeight - window.innerHeight) * scrollFraction;
       const progress = Math.max(0, Math.min(1, scrolled / triggerEnd));
       targetTime = progress * video.duration;
 
