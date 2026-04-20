@@ -370,8 +370,8 @@
         top: 68% !important;
         left: 50% !important;
         transform: translate(-50%, -50%) !important;
-        width: 105% !important;
-        height: 60% !important;
+        width: 118% !important;
+        height: 62% !important;
       }
       #hero-text-col {
         position: absolute !important;
@@ -739,7 +739,6 @@
     });
 
     let targetTime = 0;
-    let lastMobileSeek = 0;
 
     function updateVideo() {
       if (!video.duration) return;
@@ -748,19 +747,10 @@
       const triggerEnd = (document.documentElement.scrollHeight - window.innerHeight) * scrollFraction;
       const progress = Math.max(0, Math.min(1, scrolled / triggerEnd));
       targetTime = progress * video.duration;
-
-      // On mobile: skip rAF loop, just seek directly on scroll (throttled)
-      if (isMobile) {
-        const now = performance.now();
-        if (now - lastMobileSeek > 100) {
-          video.currentTime = targetTime;
-          lastMobileSeek = now;
-        }
-      }
     }
 
-    // Desktop only: smooth rAF loop
-    if (!isMobile) {
+    // Same smooth rAF loop on all devices
+    {
       let eased = 0;
       let lastSeekAt = 0;
       function smoothLoop() {
