@@ -109,7 +109,7 @@
       height: 68%;
       object-fit: contain;
       position: absolute;
-      top: 64%;
+      top: 68%;
       left: 50%;
       transform: translate(-50%, -50%);
       pointer-events: none;
@@ -359,7 +359,7 @@
       #hero-video {
         width: 92% !important;
         height: auto !important;
-        top: 63% !important;
+        top: 67% !important;
       }
       #hero-text-col {
         top: 3% !important;
@@ -401,7 +401,7 @@
        RESPONSIVE — 480px (iPhone SE / small)
     ════════════════════════════════════════════════════════════════════ */
     @media (max-width: 480px) {
-      #hero-video { width: 96% !important; top: 61% !important; }
+      #hero-video { width: 96% !important; top: 65% !important; }
       #hero-text-col { top: 2% !important; }
       .hero-buttons { flex-direction: column !important; width: 100% !important; }
       .hero-buttons a { width: 100% !important; justify-content: center !important; text-align: center !important; }
@@ -715,7 +715,10 @@
     // ── Scroll-driven video ────────────────────────────────────────────
     video.addEventListener('loadedmetadata', () => { video.currentTime = 0; });
 
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
     let targetTime = 0;
+    let lastMobileSeek = 0;
 
     function updateVideo() {
       if (!video.duration) return;
@@ -723,34 +726,46 @@
       const triggerEnd = (document.documentElement.scrollHeight - window.innerHeight) * 0.30;
       const progress = Math.max(0, Math.min(1, scrolled / triggerEnd));
       targetTime = progress * video.duration;
-    }
 
-    let eased = 0;
-    let lastSeekAt = 0;
-    function smoothLoop() {
-      if (!video.duration) { requestAnimationFrame(smoothLoop); return; }
-
-      eased += (targetTime - eased) * 0.12;
-
-      const diff = eased - video.currentTime;
-      const now = performance.now();
-
-      if (Math.abs(diff) < 0.04) {
-        if (!video.paused) video.pause();
-      } else if (diff > 0) {
-        video.playbackRate = Math.min(diff * 12, 16);
-        if (video.paused) video.play().catch(() => {});
-      } else {
-        if (!video.paused) video.pause();
-        if (now - lastSeekAt > 80) {
-          video.currentTime = Math.max(0, eased);
-          lastSeekAt = now;
+      // On mobile: skip rAF loop, just seek directly on scroll (throttled)
+      if (isMobile) {
+        const now = performance.now();
+        if (now - lastMobileSeek > 100) {
+          video.currentTime = targetTime;
+          lastMobileSeek = now;
         }
       }
-
-      requestAnimationFrame(smoothLoop);
     }
-    smoothLoop();
+
+    // Desktop only: smooth rAF loop
+    if (!isMobile) {
+      let eased = 0;
+      let lastSeekAt = 0;
+      function smoothLoop() {
+        if (!video.duration) { requestAnimationFrame(smoothLoop); return; }
+
+        eased += (targetTime - eased) * 0.12;
+
+        const diff = eased - video.currentTime;
+        const now = performance.now();
+
+        if (Math.abs(diff) < 0.04) {
+          if (!video.paused) video.pause();
+        } else if (diff > 0) {
+          video.playbackRate = Math.min(diff * 12, 16);
+          if (video.paused) video.play().catch(() => {});
+        } else {
+          if (!video.paused) video.pause();
+          if (now - lastSeekAt > 80) {
+            video.currentTime = Math.max(0, eased);
+            lastSeekAt = now;
+          }
+        }
+
+        requestAnimationFrame(smoothLoop);
+      }
+      smoothLoop();
+    }
 
     // ── Scroll listener ───────────────────────────────────────────────
     window.addEventListener('scroll', () => {
