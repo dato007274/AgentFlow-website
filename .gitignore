@@ -1,0 +1,6 @@
+# Claude Code internal files — never commit
+.claude/
+
+# OS junk
+.DS_Store
+Thumbs.db
