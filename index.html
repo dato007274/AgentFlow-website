@@ -367,11 +367,11 @@
       #hero-overlay { display: block !important; }
       #hero-video {
         position: absolute !important;
-        top: 68% !important;
+        top: 67% !important;
         left: 50% !important;
         transform: translate(-50%, -50%) !important;
-        width: 118% !important;
-        height: 62% !important;
+        width: 130% !important;
+        height: 65% !important;
       }
       #hero-text-col {
         position: absolute !important;
@@ -740,27 +740,34 @@
 
     let targetTime = 0;
 
-    function updateVideo() {
-      if (!video.duration) return;
-      const scrolled = window.scrollY;
-      const scrollFraction = isMobile ? 0.20 : 0.30;
-      const triggerEnd = (document.documentElement.scrollHeight - window.innerHeight) * scrollFraction;
-      const progress = Math.max(0, Math.min(1, scrolled / triggerEnd));
-      targetTime = progress * video.duration;
-    }
-
-    // Same smooth rAF loop on all devices
-    {
+    if (isMobile) {
+      // Mobile: one rAF per scroll event — no continuous loop, no CPU drain
+      let rafPending = false;
+      function seekMobile() {
+        if (!video.duration) return;
+        const progress = Math.max(0, Math.min(1, window.scrollY /
+          ((document.documentElement.scrollHeight - window.innerHeight) * 0.20)));
+        video.currentTime = progress * video.duration;
+        rafPending = false;
+      }
+      window.addEventListener('scroll', () => {
+        if (!rafPending) { rafPending = true; requestAnimationFrame(seekMobile); }
+      }, { passive: true });
+    } else {
+      // Desktop: smooth eased rAF loop
       let eased = 0;
       let lastSeekAt = 0;
+      function updateVideo() {
+        if (!video.duration) return;
+        const progress = Math.max(0, Math.min(1, window.scrollY /
+          ((document.documentElement.scrollHeight - window.innerHeight) * 0.30)));
+        targetTime = progress * video.duration;
+      }
       function smoothLoop() {
         if (!video.duration) { requestAnimationFrame(smoothLoop); return; }
-
         eased += (targetTime - eased) * 0.12;
-
         const diff = eased - video.currentTime;
         const now = performance.now();
-
         if (Math.abs(diff) < 0.04) {
           if (!video.paused) video.pause();
         } else if (diff > 0) {
@@ -773,7 +780,6 @@
             lastSeekAt = now;
           }
         }
-
         requestAnimationFrame(smoothLoop);
       }
       smoothLoop();
@@ -782,7 +788,7 @@
     // ── Scroll listener ───────────────────────────────────────────────
     window.addEventListener('scroll', () => {
       nav.classList.toggle('scrolled', window.scrollY > 60);
-      updateVideo();
+      if (!isMobile) updateVideo();
       revealFadeEls();
     }, { passive: true });
 
